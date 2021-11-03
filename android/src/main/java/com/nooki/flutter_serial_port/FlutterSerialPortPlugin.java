@@ -5,7 +5,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import androidx.annotation.NonNull;
-import com.example.x6.serialportlib.SerialPort;
+
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -15,6 +16,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import com.example.x6.serialportlib.SerialPort;
 
 /** FlutterSerialPortPlugin */
 public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler,EventChannel.StreamHandler {
@@ -42,6 +44,17 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
     switch (call.method) {
       case "getPlatformVersion":
         result.success("Android " + Build.VERSION.RELEASE);
+        break;
+      case "strToHexStr":
+        String str = call.argument("str");
+        if ("".equals(str)) {
+          result.success("");
+        }
+        try {
+          result.success(SerializeUtil.byteArrayToHexString(str.getBytes("gb2312")));
+        } catch (Exception e) {
+          result.success("");
+        }
         break;
       case "open":
         final String devicePath = call.argument("devicePath");
@@ -145,7 +158,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
       }
       return true;
     } catch (Exception e) {
-      Log.e(TAG, e.toString());
+      Log.e(TAG,"发送串口数据失败", e);
       return false;
     }
   }

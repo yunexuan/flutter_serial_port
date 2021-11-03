@@ -12,6 +12,11 @@ class FlutterSerialPort {
     return version;
   }
 
+  static Future<String?> strToHexStr (String str) async {
+    final String? hexStr = await _channel.invokeMethod("strToHexStr", {'str': str});
+    return hexStr;
+  }
+
   /// List all devices
   static Future<List<Device>> listDevices() async {
     List devices = await _channel.invokeMethod("getAllDevices");
