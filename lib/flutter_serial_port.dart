@@ -69,7 +69,7 @@ class SerialPort {
   /// Open device
   Future<bool> open() async {
     bool openResult = await _channel.invokeMethod(
-        "open", {'devicePath': device.path, 'baudRate': baudrate, 'parity': parity, 'dataBits': dataBits, 'stopBit': stopBit});
+        "open", {'id': device.path,'devicePath': device.path, 'baudRate': baudrate, 'parity': parity, 'dataBits': dataBits, 'stopBit': stopBit});
 
     if (openResult) {
       _deviceConnected = true;
@@ -80,7 +80,7 @@ class SerialPort {
 
   /// Close device
   Future<bool> close() async {
-    bool closeResult = await _channel.invokeMethod("close");
+    bool closeResult = await _channel.invokeMethod("close", {'id': device.path});
 
     if (closeResult) {
       _deviceConnected = false;
@@ -91,7 +91,7 @@ class SerialPort {
 
   /// Write data to device
   Future<void> write(String data, String type) async {
-    return await _channel.invokeMethod("write", {"data": data, "type": type});
+    return await _channel.invokeMethod("write", {'id': device.path,"data": data, "type": type});
   }
 }
 
