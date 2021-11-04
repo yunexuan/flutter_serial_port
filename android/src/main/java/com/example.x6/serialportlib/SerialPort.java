@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 
 public class SerialPort {
 
-	private static SerialPort serialPort;
 	private SerailPortOpt serialportopt;
 	private InputStream mInputStream;
 	public boolean isOpen = false;

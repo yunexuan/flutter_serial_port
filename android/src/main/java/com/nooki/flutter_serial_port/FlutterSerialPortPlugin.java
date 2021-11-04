@@ -5,10 +5,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import androidx.annotation.NonNull;
-
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.EventChannel;
@@ -25,8 +25,8 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
 
   private static final String TAG = "FlutterSerialPortPlugin";
   private final SerialPortFinder serialPortFinder = new SerialPortFinder();
-  protected SerialPort serialPort;
-  private ReadThread readThread;
+  private final Map<String, SerialPort> serialPortMap = new HashMap<>();
+  private final Map<String, ReadThread> readThreadMap = new HashMap<>();
   private EventChannel.EventSink eventSink;
   private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -62,15 +62,20 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         final int parity = call.argument("parity");
         final int dataBits = call.argument("dataBits");
         final int stopBit = call.argument("stopBit");
-        Boolean openResult = openDevice(devicePath, baudRate, parity, dataBits, stopBit);
+        final String id = call.argument("id");
+        if ("".equals(id)) {
+          Log.e(TAG, "串口标识符不能为空");
+          result.success(false);
+        }
+        Boolean openResult = openDevice(id, devicePath, baudRate, parity, dataBits, stopBit);
         result.success(openResult);
         break;
       case "close":
-        Boolean closeResult = closeDevice();
+        Boolean closeResult = closeDevice(call.argument("id"));
         result.success(closeResult);
         break;
       case "write":
-        Boolean writeResult = writeData(call.argument("data"), call.argument("type"));
+        Boolean writeResult = writeData(call.argument("id"), call.argument("data"), call.argument("type"));
         result.success(writeResult);
         break;
       case "getAllDevices":
@@ -114,15 +119,18 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
     return devicesPath;
   }
 
-  private Boolean openDevice(String devicePath, int baudRate, int parity, int dataBits, int stopBit) {
+  private Boolean openDevice(String id, String devicePath, int baudRate, int parity, int dataBits, int stopBit) {
+    SerialPort serialPort = serialPortMap.get(id);
     if (serialPort == null) {
       if ((devicePath.length() == 0) || (baudRate == -1)) {
         return false;
       }
       try {
         serialPort = new SerialPort(devicePath, baudRate, parity, dataBits, stopBit);
-        readThread = new ReadThread();
+        serialPortMap.put(id, serialPort);
+        ReadThread readThread = new ReadThread(serialPort);
         readThread.start();
+        readThreadMap.put("id", readThread);
         return true;
       } catch (Exception e) {
         Log.e(TAG, e.toString());
@@ -132,15 +140,20 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
     return false;
   }
 
-  private Boolean closeDevice() {
+  private Boolean closeDevice(String id) {
     try {
+      ReadThread readThread = readThreadMap.get(id);
       if (null != readThread) {
         readThread.interrupt();
-        readThread = null;
+        readThreadMap.remove(id);
       }
+      SerialPort serialPort = serialPortMap.get(id);
       if (serialPort != null) {
         serialPort.closeSerial();
-        serialPort = null;
+        serialPortMap.remove(id);
+      } else {
+        Log.e(TAG, "串口不存在");
+        return false;
       }
       return true;
     } catch (Exception e) {
@@ -149,8 +162,13 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
     return false;
   }
 
-  private Boolean writeData(String data, String type) {
+  private Boolean writeData(String id, String data, String type) {
     try {
+      SerialPort serialPort = serialPortMap.get(id);
+      if (serialPort==null) {
+        Log.e(TAG, "串口未初始化");
+        return false;
+      }
       if ("byte".equals(type)) {
         serialPort.sendData(SerializeUtil.hexStringToByteArray(data));
       } else {
@@ -177,6 +195,12 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
   }
 
   private class ReadThread extends Thread{
+
+    private final SerialPort serialPort;
+
+    public ReadThread(SerialPort serialPort) {
+      this.serialPort = serialPort;
+    }
 
     @Override
     public void run() {
