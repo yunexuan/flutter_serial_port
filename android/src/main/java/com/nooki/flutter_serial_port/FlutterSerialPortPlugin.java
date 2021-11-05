@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import androidx.annotation.NonNull;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
   private final Map<String, ReadThread> readThreadMap = new HashMap<>();
   private EventChannel.EventSink eventSink;
   private final Handler handler = new Handler(Looper.getMainLooper());
+  private final DecimalFormat df = new DecimalFormat("0.00");
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -56,6 +59,21 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
           result.success("");
         }
         break;
+      case "hexToInt":
+        String hexStr = call.argument("str");
+        if ("".equals(hexStr)) {
+          result.success("0");
+        }
+        if (hexStr.length() <= 14) {
+          result.success("0");
+        }
+        try {
+          int weight = (int) Long.parseLong(hexStr.substring(6, 14), 16);
+          String tmpWeight = df.format((float) (weight) / 1000);
+          result.success(tmpWeight);
+        } catch (Exception e) {
+          result.success("0");
+        }
       case "open":
         final String devicePath = call.argument("devicePath");
         final int baudRate = call.argument("baudRate");
