@@ -144,7 +144,8 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
     try {
       ReadThread readThread = readThreadMap.get(id);
       if (null != readThread) {
-        readThread.interrupt();
+//        readThread.interrupt();
+        readThread.isLoop = false;
         readThreadMap.remove(id);
       }
       SerialPort serialPort = serialPortMap.get(id);
@@ -197,6 +198,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
   private class ReadThread extends Thread{
 
     private final SerialPort serialPort;
+    public Boolean isLoop = true;
 
     public ReadThread(SerialPort serialPort) {
       this.serialPort = serialPort;
@@ -205,7 +207,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
     @Override
     public void run() {
       super.run();
-      while (!isInterrupted()) {
+      while (isLoop) {
         int size;
         try {
           byte[] buffer = new byte[1024];
