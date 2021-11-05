@@ -17,8 +17,8 @@ class FlutterSerialPort {
     return hexStr;
   }
 
-  static Future<int?> hexToInt (String str) async {
-    final int? num = await _channel.invokeMethod("hexToInt", {'str': str});
+  static Future<String?> hexToInt (String str) async {
+    final String? num = await _channel.invokeMethod("hexToInt", {'str': str});
     return num;
   }
 
