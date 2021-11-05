@@ -52,6 +52,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         String str = call.argument("str");
         if ("".equals(str)) {
           result.success("");
+          return;
         }
         try {
           result.success(SerializeUtil.byteArrayToHexString(str.getBytes("gb2312")));
@@ -61,19 +62,18 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         break;
       case "hexToInt":
         String hexStr = call.argument("str");
-        if ("".equals(hexStr)) {
-          result.success("0");
-        }
-        if (hexStr.length() <= 14) {
-          result.success("0");
+        if (hexStr==null) {
+          result.success(0);
+          return;
         }
         try {
-          int weight = (int) Long.parseLong(hexStr.substring(6, 14), 16);
+          int weight = (int) Long.parseLong(hexStr, 16);
           String tmpWeight = df.format((float) (weight) / 1000);
           result.success(tmpWeight);
         } catch (Exception e) {
           result.success("0");
         }
+        break;
       case "open":
         final String devicePath = call.argument("devicePath");
         final int baudRate = call.argument("baudRate");
@@ -84,6 +84,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         if ("".equals(id)) {
           Log.e(TAG, "串口标识符不能为空");
           result.success(false);
+          return;
         }
         Boolean openResult = openDevice(id, devicePath, baudRate, parity, dataBits, stopBit);
         result.success(openResult);
