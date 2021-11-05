@@ -101,7 +101,6 @@ public class SerialPort {
 
 	public void sendData(String data, String type) {
 		try {
-			Log.d("serialPort", "receive data:" + data);
 			serialportopt.writeBytes(type.equals("HEX") ? HexString2Bytes(data
 					.length() % 2 == 1 ? data += "0" : data.replace(" ", ""))
 					: HexString2Bytes(toHexString(data)));

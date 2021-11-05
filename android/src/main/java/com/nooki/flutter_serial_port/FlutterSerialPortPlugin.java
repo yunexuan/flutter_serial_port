@@ -171,6 +171,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         return false;
       }
       if ("byte".equals(type)) {
+        Log.d(TAG, "receive Print data:" + data);
         serialPort.sendData(SerializeUtil.hexStringToByteArray(data));
       } else {
         serialPort.sendData(data, type);
