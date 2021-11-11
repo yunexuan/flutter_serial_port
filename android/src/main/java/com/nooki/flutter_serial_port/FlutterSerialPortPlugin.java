@@ -230,15 +230,20 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
       while (isLoop) {
         int size;
         try {
+          if ("S4".equals(serialPort.devNum)) {
+            serialPort.sendData("AA550403BB66", "HEX");
+          }
+
+          try {
+            Thread.sleep(250);//延时10ms
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+
           byte[] buffer = new byte[1024];
           size = serialPort.receiveData(buffer);
           if (size > 0) {
             onDataReceived(buffer, size);
-          }
-          try {
-            Thread.sleep(10);//延时10ms
-          } catch (InterruptedException e) {
-            e.printStackTrace();
           }
         } catch (Exception e) {
           e.printStackTrace();

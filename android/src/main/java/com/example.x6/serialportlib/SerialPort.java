@@ -12,6 +12,7 @@ public class SerialPort {
 	private SerailPortOpt serialportopt;
 	private InputStream mInputStream;
 	public boolean isOpen = false;
+	public String devNum;
 	
 
 	String data;
@@ -20,8 +21,11 @@ public class SerialPort {
 	public SerialPort(String devNum, int speed, int dataBits, int stopBits,
                       int parity) {
 		serialportopt = new SerailPortOpt();
+		this.devNum = devNum;
 		openSerial(devNum, speed, dataBits, stopBits, parity);
 	}
+
+
 
 
 	private boolean openSerial(String devNum, int speed, int dataBits,
