@@ -209,6 +209,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         public void run() {
           int tmpSize = size * 2;
           String serialData = SerializeUtil.byteArrayToHexString(buffer).substring(0, tmpSize);
+          Log.d(TAG, "读取实时信息" + serialData);
           eventSink.success(serialData);
         }
       });
