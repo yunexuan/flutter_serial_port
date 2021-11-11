@@ -231,6 +231,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         int size;
         try {
           if ("S4".equals(serialPort.devNum)) {
+            Log.d(TAG, "发送读取实时信息指令");
             serialPort.sendData("AA550403BB66", "HEX");
           }
 
