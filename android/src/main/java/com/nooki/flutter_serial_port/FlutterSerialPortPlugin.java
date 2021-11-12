@@ -167,6 +167,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         readThread.isLoop = false;
         readThreadMap.remove(id);
       }
+      Thread.sleep(500);
       SerialPort serialPort = serialPortMap.get(id);
       if (serialPort != null) {
         serialPort.closeSerial();
@@ -209,7 +210,6 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         public void run() {
           int tmpSize = size * 2;
           String serialData = SerializeUtil.byteArrayToHexString(buffer).substring(0, tmpSize);
-          Log.d(TAG, "读取实时信息" + serialData);
           eventSink.success(serialData);
         }
       });
@@ -232,7 +232,6 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
         int size;
         try {
           if ("S4".equals(serialPort.devNum)) {
-            Log.d(TAG, "发送读取实时信息指令");
             serialPort.sendData("AA550403BB66", "HEX");
           }
 
