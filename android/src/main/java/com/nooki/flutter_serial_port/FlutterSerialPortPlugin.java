@@ -146,11 +146,15 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
       }
       try {
         serialPort = new SerialPort(devicePath, baudRate, parity, dataBits, stopBit);
-        serialPortMap.put(id, serialPort);
-        ReadThread readThread = new ReadThread(serialPort);
-        readThread.start();
-        readThreadMap.put(id, readThread);
-        return true;
+        if (serialPort.isOpen) {
+          serialPortMap.put(id, serialPort);
+          ReadThread readThread = new ReadThread(serialPort);
+          readThread.start();
+          readThreadMap.put(id, readThread);
+          return true;
+        } else {
+          return false;
+        }
       } catch (Exception e) {
         Log.e(TAG, e.toString());
         return false;
