@@ -240,7 +240,7 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
           }
 
           try {
-            Thread.sleep(250);//延时10ms
+            Thread.sleep(400);//延时10ms
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
@@ -251,7 +251,6 @@ public class FlutterSerialPortPlugin implements FlutterPlugin, MethodCallHandler
             onDataReceived(buffer, size);
           }
         } catch (Exception e) {
-          e.printStackTrace();
           return;
         }
       }
